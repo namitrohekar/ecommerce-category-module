@@ -8,10 +8,9 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/categories")
@@ -20,7 +19,7 @@ public class CategoryController {
 
     private final CategoryService categoryService;
 
-
+    // Creates a new category.
     @PostMapping
     public ResponseEntity<ApiResponse<CategoryResponse>> createCategory(
             @Valid @RequestBody CategoryRequest request){
@@ -31,5 +30,28 @@ public class CategoryController {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.success("Category created successfully" , response));
 
+    }
+
+
+    // Retrieves all active categories.
+    @GetMapping
+    public ResponseEntity<ApiResponse<List<CategoryResponse>>> getActiveCategories(){
+        List<CategoryResponse> categories = categoryService.getActiveCategories();
+
+        return ResponseEntity.ok(
+                ApiResponse.success("Categories retrieved successfully" , categories)
+        );
+    }
+
+
+    // Retrieves single active category by its Id.
+    @GetMapping("/{id}")
+    public ResponseEntity<ApiResponse<CategoryResponse>> getCategoryById(
+                                                        @PathVariable Long id){
+        CategoryResponse response = categoryService.getCategoryById(id);
+
+        return ResponseEntity.ok(
+                ApiResponse.success("Category retrieved successfully" , response)
+        );
     }
 }

@@ -8,6 +8,13 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+
+
+/*
+* Generic Wrapper for API Responses.
+* Standard success and error payload structure.
+* */
+
 public class ApiResponse<T> {
 
     private String status;
