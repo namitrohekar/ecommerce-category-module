@@ -44,7 +44,7 @@ public class CategoryController {
     }
 
 
-    // Retrieves single active category by its Id.
+    // Retrieves single active category by its id.
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<CategoryResponse>> getCategoryById(
                                                         @PathVariable Long id){
@@ -54,4 +54,30 @@ public class CategoryController {
                 ApiResponse.success("Category retrieved successfully" , response)
         );
     }
+
+    // Updates an existing category. Validates duplicate name only if name is changed.
+    @PutMapping("/{id}")
+    public ResponseEntity<ApiResponse<CategoryResponse>> updateCategory (
+                                @PathVariable Long id,
+                                @Valid @RequestBody CategoryRequest request){
+
+        CategoryResponse response = categoryService.updateCategory(id ,request);
+
+        return ResponseEntity.ok(
+                ApiResponse.success("Category updated successfully" , response)
+        );
+    }
+
+
+    @DeleteMapping("/{id}")
+
+    public ResponseEntity<ApiResponse<Object>> deleteCategory(
+                        @PathVariable Long id){
+        categoryService.deleteCategory(id);
+
+        return ResponseEntity.ok(
+                ApiResponse.success("Category deleted successfully" , null)
+        );
+    }
+
 }

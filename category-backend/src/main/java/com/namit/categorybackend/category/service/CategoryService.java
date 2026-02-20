@@ -14,6 +14,11 @@ public interface CategoryService {
     // Gets all active categories
     List<CategoryResponse> getActiveCategories();
 
-    // Gets all active categories by specified categoryId
+    // Retrieves an active category by its ID.
     CategoryResponse getCategoryById(Long id);
+
+    CategoryResponse updateCategory(Long id , CategoryRequest request);
+
+    // Performs soft delete by marking category as inactive.
+    void deleteCategory(Long id);
 }
