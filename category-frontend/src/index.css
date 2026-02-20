@@ -1,0 +1,42 @@
+@import "tailwindcss";
+
+:root {
+  --bg-primary: #F8FAFC;
+  --bg-surface: #FFFFFF;
+  --bg-subtle: #F1F5F9;
+  --border-soft: #E2E8F0;
+  --border-hover: #CBD5E1;
+  --text-primary: #0F172A;
+  --text-secondary: #475569;
+  --text-muted: #94A3B8;
+  --accent-primary: #0F766E;
+  --accent-soft: #E6FFFA;
+  --accent-hover: #115E59;
+  --success: #16A34A;
+  --success-soft: #DCFCE7;
+  --danger: #B91C1C;
+  --danger-soft: #FEE2E2;
+  --focus-ring: rgba(15, 118, 110, 0.20);
+  --radius-lg: 12px;
+  --shadow-subtle: 0 1px 2px rgba(16, 24, 40, 0.03), 0 2px 6px rgba(15, 118, 110, 0.03);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Focus utility */
+.focus-teal:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--focus-ring);
+}
