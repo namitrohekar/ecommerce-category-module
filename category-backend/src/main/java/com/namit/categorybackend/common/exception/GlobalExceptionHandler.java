@@ -1,6 +1,6 @@
 package com.namit.categorybackend.common.exception;
 
-import com.namit.categorybackend.common.response.ApiResponse;
+import com.namit.categorybackend.common.response.ApiWrapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -16,20 +16,20 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(ResourceAlreadyExistsException.class)
 
-    public ResponseEntity<ApiResponse<Object>> handleResourceAlreadyExists(
+    public ResponseEntity<ApiWrapper<Object>> handleResourceAlreadyExists(
             ResourceAlreadyExistsException ex){
-        ApiResponse<Object> response = ApiResponse.builder()
+        ApiWrapper<Object> response = ApiWrapper.builder()
                 .status("error")
                 .message(ex.getMessage())
                 .data(null)
                 .build();
 
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(ApiResponse.error(ex.getMessage()));
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ApiWrapper.error(ex.getMessage()));
     }
 
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ApiResponse<Object>> handleValidationErrors(
+    public ResponseEntity<ApiWrapper<Object>> handleValidationErrors(
             MethodArgumentNotValidException ex) {
 
         String message = ex.getBindingResult()
@@ -40,22 +40,22 @@ public class GlobalExceptionHandler {
                 .orElse("Validation failed");
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(ApiResponse.error(message));
+                .body(ApiWrapper.error(message));
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ApiResponse<Object>> handleGenericException(Exception ex) {
+    public ResponseEntity<ApiWrapper<Object>> handleGenericException(Exception ex) {
 
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ApiResponse.error("Something went wrong. Please try again."));
+                .body(ApiWrapper.error("Something went wrong. Please try again."));
     }
 
 
 
     @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<ApiResponse<Object>> handleResourceNotFound(
+    public ResponseEntity<ApiWrapper<Object>> handleResourceNotFound(
             ResourceNotFoundException ex){
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(ApiResponse.error(ex.getMessage()));
+                .body(ApiWrapper.error(ex.getMessage()));
     }
 }

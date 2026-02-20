@@ -15,7 +15,7 @@ import lombok.*;
 * Standard success and error payload structure.
 * */
 
-public class ApiResponse<T> {
+public class ApiWrapper<T> {
 
     private String status;
 
@@ -23,8 +23,8 @@ public class ApiResponse<T> {
 
     private T data;
 
-    public static <T> ApiResponse<T> success(String message , T data){
-        return ApiResponse.<T>builder()
+    public static <T> ApiWrapper<T> success(String message , T data){
+        return ApiWrapper.<T>builder()
                 .status("success")
                 .message(message)
                 .data(data)
@@ -32,8 +32,8 @@ public class ApiResponse<T> {
     }
 
 
-    public static <T> ApiResponse<T> error(String message ){
-        return ApiResponse.<T>builder()
+    public static <T> ApiWrapper<T> error(String message ){
+        return ApiWrapper.<T>builder()
                 .status("error")
                 .message(message)
                 .data(null)

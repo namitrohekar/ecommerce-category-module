@@ -1,0 +1,443 @@
+{
+  "info": {
+    "_postman_id": "19ea10cb-0ed3-48ef-8a93-885de09610cd",
+    "name": "CategoryManagement",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "44242266"
+  },
+  "item": [
+    {
+      "name": "Category APIs",
+      "item": [
+        {
+          "name": "Create Category",
+          "item": [
+            {
+              "name": "Create-Valid",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"categoryName\": \"Clothing\",\r\n  \"description\": \"Trying duplicate\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/v1/categories",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "categories"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Create -duplicate",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"categoryName\": \"Test categoryName\",\r\n  \"description\": \"Test Category Description\"\r\n}\r\n",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/v1/categories",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "categories"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Create - Validation Error",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"categoryName\": \"\",\r\n  \"description\": \"Test Category Description\"\r\n}\r\n",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/v1/categories",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "categories"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Get Categories",
+          "item": [
+            {
+              "name": "Get Active Categories",
+              "protocolProfileBehavior": {
+                "disableBodyPruning": true
+              },
+              "request": {
+                "method": "GET",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"categoryName\": \"Grocery\",\r\n  \"description\": \"Everyday Fresh Products\"\r\n}\r\n"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/v1/categories",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "categories"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Get All - Empty",
+              "protocolProfileBehavior": {
+                "disableBodyPruning": true
+              },
+              "request": {
+                "method": "GET",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"categoryName\": \"\",\r\n  \"description\": \"Test Category Description\"\r\n}\r\n"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/v1/categories",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "categories"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Get Category By ID",
+          "item": [
+            {
+              "name": "Get  By ID - Success",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8080/api/v1/categories/5",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "api",
+                    "v1",
+                    "categories",
+                    "5"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Get By ID - Not Found",
+              "protocolProfileBehavior": {
+                "disableBodyPruning": true
+              },
+              "request": {
+                "method": "GET",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"categoryName\": \"\",\r\n  \"description\": \"Test Category Description\"\r\n}\r\n"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/v1/categories/999",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "categories",
+                    "999"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Get By ID - Inactive",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/categories/5",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "categories",
+                    "5"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Update Category",
+          "item": [
+            {
+              "name": "Update Valid",
+              "request": {
+                "method": "PUT",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"categoryName\": \"grocery 2\",\r\n  \"description\": \"anything 2\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/v1/categories/6",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "categories",
+                    "6"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Update - Description Only",
+              "request": {
+                "method": "PUT",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"categoryName\": \"grocery 2\",\r\n  \"description\": \"Description only\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/v1/categories/6",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "categories",
+                    "6"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Update -  Not Found",
+              "request": {
+                "method": "PUT",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"categoryName\": \"Clothing\",\r\n  \"description\": \"Trying duplicate\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/v1/categories/999",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "categories",
+                    "999"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Update - Duplicate Name Copy",
+              "request": {
+                "method": "PUT",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"categoryName\": \"Clothing\",\r\n  \"description\": \"Trying duplicate\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/v1/categories/6",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "categories",
+                    "6"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Delete Category",
+          "item": [
+            {
+              "name": "Delete-Success",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"categoryName\": \"grocery\",\r\n  \"description\": \"anything\"\r\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/v1/categories/6",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "categories",
+                    "6"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Delete-Already Deleted",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"categoryName\": \"grocery\",\r\n  \"description\": \"anything\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/v1/categories/5",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "categories",
+                    "5"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Delete-Not Found",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"categoryName\": \"grocery\",\r\n  \"description\": \"anything\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/v1/categories/999",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "categories",
+                    "999"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
