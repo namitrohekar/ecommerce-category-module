@@ -4,7 +4,7 @@ import {
     getCategories,
     createCategory,
     updateCategory,
-    deleteCategory,
+    toggleCategoryStatus,
 } from "../services/categoryService";
 import CategoryTable from "../components/CategoryTable";
 import CategoryForm from "../components/CategoryForm";
@@ -34,17 +34,33 @@ export default function Category() {
     const [selectedCategory, setSelectedCategory] = useState(null);
 
 
+    /* Pagination*/
+    const[page , setPage] = useState(0);
+    const [size] = useState(10);
+    const [totalPages , setTotalPages] = useState(0);
+    const [totalElements , setTotalElements] = useState(0);
+
+    /* Filter */
+    const [statusFilter , setStatusFilter] = useState("active");
+
     const fetchCategories = useCallback(async () => {
         setLoading(true);
         try {
-            const res = await getCategories();
-            setCategories(res.data?.data ?? []);
+            const res = await getCategories(page,size,statusFilter);
+
+            const pageData = res.data?.data;
+
+            setCategories(pageData?.content ?? []);
+            setTotalPages(pageData?.totalPages ?? 0);
+            setTotalElements(pageData?.totalElements ?? 0);
+
+
         } catch (error) {
             toast.error(error.response?.data?.message || "Failed to load categories.");
         } finally {
             setLoading(false);
         }
-    }, []);
+    }, [page , size ,statusFilter]);
 
     useEffect(() => {
         fetchCategories();
@@ -86,7 +102,7 @@ export default function Category() {
                     toast.success(res.data.message);
                 }
                 closeModal();
-                fetchCategories();
+                setPage(0);
             } catch (error) {
                 const status = error?.response?.status;
                 const body = error?.response?.data;
@@ -111,36 +127,43 @@ export default function Category() {
                 }
             }
         },
-        [isEditing, selectedCategory, closeModal, fetchCategories]
+        [isEditing, selectedCategory, closeModal,]
     );
 
-    /* Delete */
-    const handleDelete = useCallback((category) => {
-    toast(`Delete "${category.categoryName}"?`, {
-        action: {
-            label: "Delete",
-            onClick: async () => {
-                try {
-                    const res = await deleteCategory(category.categoryId);
-                    toast.success(res.data.message);
-                    fetchCategories();
-                } catch (error) {
-                    const status = error?.response?.status;
-                    if (status === 404) {
-                        toast.error("Category not found — it may already be deleted.");
-                        fetchCategories();
-                    } else {
-                        toast.error(error.response?.data?.message || "Failed to delete category.");
+    /* Toggle Status */
+    const handleToggleStatus = useCallback((category) => {
+        const isActivating = !category.status;
+        const actionText = isActivating ? "Activate" : "Deactivate";
+
+        toast(`${actionText} "${category.categoryName}"?`, {
+            action: {
+                label: actionText,
+                onClick: async () => {
+                    try {
+                        const res = await toggleCategoryStatus(category.categoryId);
+                        toast.success(res.data.message);
+                        if(page >= totalPages - 1 && page > 0 && categories.length === 1){
+                            setPage( p => p -1);
+                        }else{
+                            fetchCategories();
+                        }
+                    } catch (error) {
+                        const status = error?.response?.status;
+                        if (status === 404) {
+                            toast.error("Category not found.");
+                            fetchCategories();
+                        } else {
+                            toast.error(error.response?.data?.message || `Failed to ${actionText.toLowerCase()} category.`);
+                        }
                     }
-                }
+                },
             },
-        },
-        cancel: {
-            label: "Cancel",
-            onClick: () => {},
-        },
-    });
-}, [fetchCategories]);
+            cancel: {
+                label: "Cancel",
+                onClick: () => { },
+            },
+        });
+    }, [fetchCategories, page , totalPages , categories.length]);
 
     return (
         <div
@@ -149,14 +172,36 @@ export default function Category() {
             <div className="max-w-5xl mx-auto">
 
                 {/* Page Header  */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-                    <div>
+                <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-6">
+                    <div className="flex-1">
                         <h1 className="text-2xl font-bold text-[var(--text-primary)]">
                             Categories
                         </h1>
                         <p className="mt-0.5 text-sm text-[var(--text-secondary)]">
                             Manage your product categories
                         </p>
+                    </div>
+
+                   {/* Filter */}
+                    <div className="flex items-center gap-3">
+                        
+                        {/* <span className="text-sm text-[var(--text-muted)]">
+                            Show
+                         </span> */}
+                        <select value={statusFilter} 
+                        onChange={(e)  => {
+                            setPage(0);
+                            setStatusFilter(e.target.value);
+                        }}
+                        className="px-3 py-2 rounded-lg border border-[var(--border-soft)] bg-[var(--bg-surface)] text-sm 
+                            focus:outline-none focus:ring-1 focus:ring-[var(--accent-primary)]"
+                        >
+                            <option value={"active"}>Active</option>
+                            <option value={"inactive"}>Inactive</option>
+                            <option value={"all"}>All</option>
+
+                        </select>
+            
                     </div>
 
                     {/* New Category */}
@@ -202,7 +247,7 @@ export default function Category() {
                         <MemoTable
                             categories={categories}
                             onEdit={openEditModal}
-                            onDelete={handleDelete}
+                            onToggleStatus={handleToggleStatus}
                         />
                     )}
                 </div>
@@ -210,10 +255,38 @@ export default function Category() {
                 {/* Row count */}
                 {!loading && (
                     <p className="mt-3 text-xs text-right text-[var(--text-muted)]">
-                        {categories.length}{" "}
-                        {categories.length === 1 ? "category" : "categories"} total
+                        {totalElements}{" "}
+                        {totalElements === 1 ? "category" : "categories"} total
                     </p>
                 )}
+
+                {/* Pagination controls */}
+                {!loading && totalPages > 1 && (
+                    <div className=" flex justify-end items-center gap-4 mt-4">
+                        <button
+                            disabled={page === 0}
+                            onClick={() => setPage(p => p - 1)}
+                            className="px-3 py-1 border rounded disabled:opacity-40"
+                        >
+                            Prev
+                        </button>
+
+                    <span className="text-sm text-[var(--text-muted)]">
+                        Page {page + 1} of {totalPages}
+                    </span>
+
+                    <button
+                            disabled={page + 1 >= totalPages}
+                            onClick={() => setPage(p => p + 1)}
+                            className="px-3 py-1 border rounded disabled:opacity-40"
+                        >
+                            Next
+                        </button>
+
+                    </div>
+                )
+
+                }
             </div>
 
             {/* Modal */}

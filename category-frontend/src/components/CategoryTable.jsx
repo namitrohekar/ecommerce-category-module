@@ -1,13 +1,13 @@
-import { Pencil, Trash2 } from "lucide-react";
+import { Pencil, ToggleLeft, ToggleRight } from "lucide-react";
 
 /**
  * CategoryTable — pure presentational component.
  * Props:
  *   categories : array of category objects from backend
- *   onEdit     : (category) => void
- *   onDelete   : (category) => void
+ *   onEdit         : (category) => void
+ *   onToggleStatus : (category) => void
  */
-export default function CategoryTable({ categories, onEdit, onDelete }) {
+export default function CategoryTable({ categories, onEdit, onToggleStatus }) {
     if (!categories.length) {
         return (
             <div className="py-16 text-center text-sm text-[var(--text-muted)]">
@@ -17,21 +17,21 @@ export default function CategoryTable({ categories, onEdit, onDelete }) {
     }
 
     function formatDateTime(value) {
-    const d = new Date(value);
+        const d = new Date(value);
 
-    const datePart = d.toLocaleDateString(undefined, {
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-    });
+        const datePart = d.toLocaleDateString(undefined, {
+            year: "numeric",
+            month: "short",
+            day: "numeric",
+        });
 
-    const timePart = d.toLocaleTimeString(undefined, {
-        hour: "2-digit",
-        minute: "2-digit",
-    });
+        const timePart = d.toLocaleTimeString(undefined, {
+            hour: "2-digit",
+            minute: "2-digit",
+        });
 
-    return `${datePart} • ${timePart}`;
-}
+        return `${datePart} • ${timePart}`;
+    }
 
     return (
         <div className="overflow-x-auto rounded-xl border border-[var(--border-soft)]"
@@ -80,20 +80,33 @@ export default function CategoryTable({ categories, onEdit, onDelete }) {
                                 <div className="flex items-center justify-end gap-2">
                                     {/* Edit */}
                                     <button
-                                        onClick={() => onEdit(cat)}
+                                        onClick={() =>  cat.status && onEdit(cat)}
+                                        disabled ={!cat.status}
+                                        title={!cat.status ?  "Inactive category can not be edited" : ""}
                                         aria-label={`Edit ${cat.categoryName}`}
-                                        className="p-2 rounded-lg border border-[var(--border-soft)] hover:border-[var(--accent-primary)] hover:bg-[var(--accent-soft)] transition-colors duration-150"
+                                        className={`p-2 rounded-lg border transition-colors duration-150 ${
+                                        cat.status
+                                          ? "border-[var(--border-soft)] hover:border-[var(--accent-primary)] hover:bg-[var(--accent-soft)]"
+                                          : "border-[var(--border-soft)] opacity-40 cursor-not-allowed"
+                                             }`}
                                     >
-                                        <Pencil size={15} className="text-[var(--accent-primary)]" />
+                                        <Pencil size={15} className={cat.status ? "text-[var(--accent-primary)]" : "text-[var(--text-muted)]"} />
                                     </button>
 
-                                    {/* Delete */}
+                                    {/* Toggle Status */}
                                     <button
-                                        onClick={() => onDelete(cat)}
-                                        aria-label={`Delete ${cat.categoryName}`}
-                                        className="p-2 rounded-lg border border-[var(--border-soft)] hover:border-[var(--danger)] hover:bg-[var(--danger-soft)] transition-colors duration-150"
+                                        onClick={() => onToggleStatus(cat)}
+                                        aria-label={cat.status ? `Deactivate ${cat.categoryName}` : `Activate ${cat.categoryName}`}
+                                        className={`p-2 rounded-lg border border-[var(--border-soft)] transition-colors duration-150 ${cat.status
+                                                ? "hover:border-[var(--warning)] hover:bg-[var(--warning-soft)] text-[var(--warning)]"
+                                                : "hover:border-[var(--success)] hover:bg-[var(--success-soft)] text-[var(--text-muted)] hover:text-[var(--success)]"
+                                            }`}
                                     >
-                                        <Trash2 size={15} className="text-[var(--danger)]" />
+                                        {cat.status ? (
+                                            <ToggleRight size={18} className="text-[var(--success)]" />
+                                        ) : (
+                                            <ToggleLeft size={18} className="text-[var(--text-muted)]" />
+                                        )}
                                     </button>
                                 </div>
                             </td>
