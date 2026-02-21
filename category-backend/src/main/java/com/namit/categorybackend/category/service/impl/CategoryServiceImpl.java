@@ -9,6 +9,7 @@ import com.namit.categorybackend.category.service.CategoryService;
 import com.namit.categorybackend.category.specification.CategorySpecification;
 import com.namit.categorybackend.common.exception.ResourceAlreadyExistsException;
 import com.namit.categorybackend.common.exception.ResourceNotFoundException;
+import com.namit.categorybackend.common.response.PagedResponse;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -41,7 +42,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public Page<CategoryResponse> getAllCategories(int page , int size , String status) {
+    public PagedResponse<CategoryResponse> getAllCategories(int page , int size , String status) {
 
         Pageable pageable = PageRequest.of(
                 page,
@@ -60,7 +61,15 @@ public class CategoryServiceImpl implements CategoryService {
 
         Page<Category> categoryPage = categoryRepository.findAll(spec ,pageable);
 
-        return categoryPage.map(CategoryMapper::toResponse);
+        Page<CategoryResponse> mappedPage = categoryPage.map(CategoryMapper::toResponse);
+
+        return new PagedResponse<>(
+                mappedPage.getContent(),
+                mappedPage.getNumber(),
+                mappedPage.getSize(),
+                mappedPage.getTotalElements(),
+                mappedPage.getTotalPages()
+        );
     }
 
     @Override

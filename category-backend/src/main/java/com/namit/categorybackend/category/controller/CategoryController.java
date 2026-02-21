@@ -4,6 +4,7 @@ import com.namit.categorybackend.category.dto.CategoryRequest;
 import com.namit.categorybackend.category.dto.CategoryResponse;
 import com.namit.categorybackend.category.service.CategoryService;
 import com.namit.categorybackend.common.response.ApiWrapper;
+import com.namit.categorybackend.common.response.PagedResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -47,12 +48,12 @@ public class CategoryController {
                         @ApiResponse(responseCode = "200", description = "Categories retrieved")
         })
         @GetMapping
-        public ResponseEntity<ApiWrapper<Page<CategoryResponse>>> getAllCategories(
+        public ResponseEntity<ApiWrapper<PagedResponse<CategoryResponse>>> getAllCategories(
                 @RequestParam(defaultValue = "0") int page,
                 @RequestParam(defaultValue = "10") int size,
                 @RequestParam(defaultValue = "active") String status
         ) {
-                Page<CategoryResponse> categories = categoryService.getAllCategories(page,size,status);
+                PagedResponse<CategoryResponse> categories = categoryService.getAllCategories(page,size,status);
 
                 return ResponseEntity.ok(
                                 ApiWrapper.success("Categories retrieved successfully", categories));

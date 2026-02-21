@@ -2,6 +2,7 @@ package com.namit.categorybackend.category.service;
 
 import com.namit.categorybackend.category.dto.CategoryRequest;
 import com.namit.categorybackend.category.dto.CategoryResponse;
+import com.namit.categorybackend.common.response.PagedResponse;
 import org.springframework.data.domain.Page;
 
 
@@ -11,7 +12,7 @@ public interface CategoryService {
     CategoryResponse createCategory(CategoryRequest request);
 
     // Gets all categories
-    Page<CategoryResponse> getAllCategories(int page , int size , String status);
+    PagedResponse<CategoryResponse> getAllCategories(int page , int size , String status);
 
     // Retrieves an active category by its ID.
     CategoryResponse getCategoryById(Long id);
