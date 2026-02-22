@@ -23,6 +23,34 @@ The implementation emphasizes clean layering, predictable behavior, and domain i
 
 ---
 
+##  Live Deployment
+
+### Frontend (Vercel)
+
+```text
+https://ecommerce-category-module.vercel.app
+```
+
+### Backend (Render)
+
+```text
+https://category-backend-4q0p.onrender.com
+```
+
+### Swagger UI (Production API Docs)
+
+```text
+https://category-backend-4q0p.onrender.com/swagger-ui/index.html
+```
+
+### OpenAPI Specification (JSON)
+
+```text
+https://category-backend-4q0p.onrender.com/v3/api-docs
+```
+
+---
+
 ## Project Architecture
 
 This module is split into two applications:
@@ -219,7 +247,8 @@ Soft delete ensures historical integrity and prevents accidental data loss.
 
 ## API Endpoints
 
-Base URL: `http://localhost:8080/api/v1`
+Base URL (Local): `http://localhost:8080/api/v1`  
+Base URL (Production): `https://category-backend-4q0p.onrender.com/api/v1`
 
 | Method | Endpoint                                   | Description                          |
 | ------ | ------------------------------------------ | ------------------------------------ |
