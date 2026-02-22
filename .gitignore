@@ -15,3 +15,7 @@ Thumbs.db
 # Node
 node_modules/
 dist/
+
+# Spring Boot profile files (contain credentials — never commit)
+**/application-dev.properties
+**/application-prod.properties
