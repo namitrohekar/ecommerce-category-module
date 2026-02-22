@@ -19,3 +19,7 @@ dist/
 # Spring Boot profile files (contain credentials — never commit)
 **/application-dev.properties
 **/application-prod.properties
+
+# Frontend env files (contain API URLs and secrets)
+category-frontend/.env.local
+category-frontend/.env.production
