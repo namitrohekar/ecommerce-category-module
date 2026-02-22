@@ -35,18 +35,18 @@ export default function Category() {
 
 
     /* Pagination*/
-    const[page , setPage] = useState(0);
+    const [page, setPage] = useState(0);
     const [size] = useState(10);
-    const [totalPages , setTotalPages] = useState(0);
-    const [totalElements , setTotalElements] = useState(0);
+    const [totalPages, setTotalPages] = useState(0);
+    const [totalElements, setTotalElements] = useState(0);
 
     /* Filter */
-    const [statusFilter , setStatusFilter] = useState("active");
+    const [statusFilter, setStatusFilter] = useState("active");
 
     const fetchCategories = useCallback(async () => {
         setLoading(true);
         try {
-            const res = await getCategories(page,size,statusFilter);
+            const res = await getCategories(page, size, statusFilter);
 
             const pageData = res.data?.data;
 
@@ -60,7 +60,7 @@ export default function Category() {
         } finally {
             setLoading(false);
         }
-    }, [page , size ,statusFilter]);
+    }, [page, size, statusFilter]);
 
     useEffect(() => {
         fetchCategories();
@@ -102,7 +102,11 @@ export default function Category() {
                     toast.success(res.data.message);
                 }
                 closeModal();
-                setPage(0);
+                if (page === 0) {
+                    fetchCategories(); // already on page 0 → force a refresh
+                } else {
+                    setPage(0); // navigating to page 0 triggers useEffect → fetchCategories
+                }
             } catch (error) {
                 const status = error?.response?.status;
                 const body = error?.response?.data;
@@ -127,7 +131,7 @@ export default function Category() {
                 }
             }
         },
-        [isEditing, selectedCategory, closeModal,]
+        [isEditing, selectedCategory, closeModal, fetchCategories, page]
     );
 
     /* Toggle Status */
@@ -142,9 +146,9 @@ export default function Category() {
                     try {
                         const res = await toggleCategoryStatus(category.categoryId);
                         toast.success(res.data.message);
-                        if(page >= totalPages - 1 && page > 0 && categories.length === 1){
-                            setPage( p => p -1);
-                        }else{
+                        if (page >= totalPages - 1 && page > 0 && categories.length === 1) {
+                            setPage(p => p - 1);
+                        } else {
                             fetchCategories();
                         }
                     } catch (error) {
@@ -163,7 +167,7 @@ export default function Category() {
                 onClick: () => { },
             },
         });
-    }, [fetchCategories, page , totalPages , categories.length]);
+    }, [fetchCategories, page, totalPages, categories.length]);
 
     return (
         <div
@@ -182,18 +186,18 @@ export default function Category() {
                         </p>
                     </div>
 
-                   {/* Filter */}
+                    {/* Filter */}
                     <div className="flex items-center gap-3">
-                        
+
                         {/* <span className="text-sm text-[var(--text-muted)]">
                             Show
                          </span> */}
-                        <select value={statusFilter} 
-                        onChange={(e)  => {
-                            setPage(0);
-                            setStatusFilter(e.target.value);
-                        }}
-                        className="px-3 py-2 rounded-lg border border-[var(--border-soft)] bg-[var(--bg-surface)] text-sm 
+                        <select value={statusFilter}
+                            onChange={(e) => {
+                                setPage(0);
+                                setStatusFilter(e.target.value);
+                            }}
+                            className="px-3 py-2 rounded-lg border border-[var(--border-soft)] bg-[var(--bg-surface)] text-sm 
                             focus:outline-none focus:ring-1 focus:ring-[var(--accent-primary)]"
                         >
                             <option value={"active"}>Active</option>
@@ -201,7 +205,7 @@ export default function Category() {
                             <option value={"all"}>All</option>
 
                         </select>
-            
+
                     </div>
 
                     {/* New Category */}
@@ -271,11 +275,11 @@ export default function Category() {
                             Prev
                         </button>
 
-                    <span className="text-sm text-[var(--text-muted)]">
-                        Page {page + 1} of {totalPages}
-                    </span>
+                        <span className="text-sm text-[var(--text-muted)]">
+                            Page {page + 1} of {totalPages}
+                        </span>
 
-                    <button
+                        <button
                             disabled={page + 1 >= totalPages}
                             onClick={() => setPage(p => p + 1)}
                             className="px-3 py-1 border rounded disabled:opacity-40"
