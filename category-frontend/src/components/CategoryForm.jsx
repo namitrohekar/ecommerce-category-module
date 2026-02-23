@@ -8,6 +8,7 @@ import { useForm } from "react-hook-form";
  *   defaultValues: category object when editing, undefined when creating
  *   isEditing    : boolean
  */
+
 export default function CategoryForm({ onSubmit, defaultValues, isEditing }) {
     const {
         register,
@@ -23,7 +24,6 @@ export default function CategoryForm({ onSubmit, defaultValues, isEditing }) {
         },
     });
 
-    /* Populate form when switching to edit mode */
     useEffect(() => {
         if (isEditing && defaultValues) {
             reset({
@@ -45,7 +45,6 @@ export default function CategoryForm({ onSubmit, defaultValues, isEditing }) {
 
     const isUpdateDisabled = isEditing && !isDirty;
 
-    /* Base input class - border flips to --danger on error */
     const inputClass = (hasError) =>
         [
             "w-full px-3 py-2 rounded-lg border text-sm",
@@ -94,7 +93,8 @@ export default function CategoryForm({ onSubmit, defaultValues, isEditing }) {
                     htmlFor="description"
                     className="block mb-1.5 text-sm font-medium text-[var(--text-secondary)]"
                 >
-                    Description
+                    Description{" "}
+                    <span className="text-[var(--text-muted)] font-normal text-xs">(optional)</span>
                 </label>
                 <textarea
                     id="description"
@@ -103,9 +103,21 @@ export default function CategoryForm({ onSubmit, defaultValues, isEditing }) {
                     className={inputClass(!!errors.description)}
                     style={{ resize: "vertical" }}
                     {...register("description", {
+                        minLength: {
+                            value: 10,
+                            message: "Description must be at least 10 characters",
+                        },
                         maxLength: {
                             value: 300,
                             message: "Description must be 300 characters or fewer",
+                        },
+                        validate: (value) => {
+                            // Only validate minLength if something was actually typed
+                            const trimmed = value?.trim() ?? "";
+                            if (trimmed.length > 0 && trimmed.length < 10) {
+                                return "Description must be at least 10 characters";
+                            }
+                            return true;
                         },
                     })}
                 />
@@ -131,12 +143,8 @@ export default function CategoryForm({ onSubmit, defaultValues, isEditing }) {
                     ].join(" ")}
                 >
                     {isSubmitting
-                        ? isEditing
-                            ? "Updating…"
-                            : "Creating…"
-                        : isEditing
-                            ? "Update Category"
-                            : "Create Category"}
+                        ? isEditing ? "Updating…" : "Creating…"
+                        : isEditing ? "Update Category" : "Create Category"}
                 </button>
             </div>
         </form>
