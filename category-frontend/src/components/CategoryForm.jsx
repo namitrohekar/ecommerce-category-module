@@ -93,13 +93,13 @@ export default function CategoryForm({ onSubmit, defaultValues, isEditing }) {
                     htmlFor="description"
                     className="block mb-1.5 text-sm font-medium text-[var(--text-secondary)]"
                 >
-                    Description{" "}
+                    Description <span className="text-[var(--danger)]">*</span>
                   
                 </label>
                 <textarea
                     id="description"
                     rows={3}
-                    placeholder="Optional short description…"
+                    placeholder="Short description…"
                     className={inputClass(!!errors.description)}
                     style={{ resize: "vertical" }}
                     {...register("description", {
