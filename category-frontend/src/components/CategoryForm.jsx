@@ -94,7 +94,7 @@ export default function CategoryForm({ onSubmit, defaultValues, isEditing }) {
                     className="block mb-1.5 text-sm font-medium text-[var(--text-secondary)]"
                 >
                     Description{" "}
-                    <span className="text-[var(--text-muted)] font-normal text-xs">(optional)</span>
+                  
                 </label>
                 <textarea
                     id="description"
