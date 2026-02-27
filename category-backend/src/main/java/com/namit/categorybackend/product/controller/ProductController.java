@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -56,4 +57,61 @@ public class ProductController {
                 ApiWrapper.success(
                         "Products retrieved successfully" , product));
     }
+
+    // Get product by ID
+    @Operation(summary = "Get product by its id")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200" , description = "Product retrieved"),
+            @ApiResponse(responseCode = "404" , description = "Product not found")
+    })
+    @GetMapping("/{id}")
+    public ResponseEntity<ApiWrapper<ProductResponse>> getProductById(
+            @PathVariable Long id){
+
+        ProductResponse product = productService.getProductById(id);
+
+        return ResponseEntity.ok(
+                ApiWrapper.success("Product fetched successfully" , product));
+
+    }
+
+    // Toggle status
+    @Operation(summary = "Toggle product status")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200" , description = "Product status toggled"),
+            @ApiResponse(responseCode = "404" , description = "Product not found")
+    })
+    @PatchMapping("/{id}/toggle")
+    public ResponseEntity<ApiWrapper<ProductResponse>> toggleProductStatus( @PathVariable Long id){
+        ProductResponse product = productService.toggleProductStatus(id);
+
+        return ResponseEntity.ok(
+                ApiWrapper.success("Product status toggled successfully" , product));
+    }
+
+
+
+    // Update product
+
+    @Operation(summary = "Update product")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "product updated successfully"),
+            @ApiResponse(responseCode = "400", description = "Validation error"),
+            @ApiResponse(responseCode = "404", description = "Product not found"),
+            @ApiResponse(responseCode = "409", description = "Duplicate SKU name")
+    })
+    @PutMapping("/{id}")
+    public ResponseEntity<ApiWrapper<ProductResponse>> updateProduct(
+                                                  @PathVariable Long id ,
+                                                 @Valid @RequestBody ProductRequest request){
+        ProductResponse response = productService.updateProduct(id,request);
+
+        return ResponseEntity.ok(
+                ApiWrapper.success("Product Updated successfully" , response));
+    }
+
+
+
+
+
 }

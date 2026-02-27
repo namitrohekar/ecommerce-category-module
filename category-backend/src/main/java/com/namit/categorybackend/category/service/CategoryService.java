@@ -17,6 +17,7 @@ public interface CategoryService {
     // Retrieves an active category by its ID.
     CategoryResponse getCategoryById(Long id);
 
+    // Updates the category
     CategoryResponse updateCategory(Long id, CategoryRequest request);
 
     // Performs soft delete by marking category as inactive.
