@@ -86,7 +86,7 @@ export default function PublicProducts() {
                                     {product.productName}
                                 </h3>
                                 <span className="text-base font-bold text-[var(--accent-primary)] whitespace-nowrap ml-2">
-                                    ${Number(product.price).toFixed(2)}
+                                    &#8377;{Number(product.price).toFixed(2)}
                                 </span>
                             </div>
 

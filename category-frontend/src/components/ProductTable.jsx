@@ -70,7 +70,7 @@ export default function ProductTable({ products, onEdit, onToggleStatus }) {
                             </td>
 
                             <td className="px-4 py-3 hidden md:table-cell text-[var(--text-primary)] font-medium">
-                                ${Number(prod.price).toFixed(2)}
+                                &#8377;{Number(prod.price).toFixed(2)}
                             </td>
 
                             <td className="px-4 py-3 hidden md:table-cell text-[var(--text-secondary)]">
