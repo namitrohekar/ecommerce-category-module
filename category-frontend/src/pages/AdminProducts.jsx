@@ -1,22 +1,21 @@
 import { useState, useEffect, useCallback, memo } from "react";
 import { toast } from "sonner";
 import {
-    getCategories,
-    createCategory,
-    updateCategory,
-    toggleCategoryStatus,
-} from "../services/categoryService";
-import CategoryTable from "../components/CategoryTable";
-import CategoryForm from "../components/CategoryForm";
+    getProducts,
+    createProduct,
+    updateProduct,
+    toggleProductStatus,
+} from "../services/productService";
+import ProductTable from "../components/ProductTable";
+import ProductForm from "../components/ProductForm";
 import Modal from "../components/Modal";
-import CategoryReassignModal from "../components/CategoryReassignModal";
 
-const MemoTable = memo(CategoryTable);
+const MemoTable = memo(ProductTable);
 
 function SkeletonRow() {
     return (
         <tr className="border-t border-[var(--border-soft)] animate-pulse">
-            {[...Array(6)].map((_, i) => (
+            {[...Array(8)].map((_, i) => (
                 <td key={i} className="px-4 py-3">
                     <div className="h-3 rounded bg-[var(--bg-subtle)]" />
                 </td>
@@ -25,29 +24,38 @@ function SkeletonRow() {
     );
 }
 
+/**
+ * Maps server-returned field names → react-hook-form field names.
+ */
 const SERVER_FIELD_MAP = {
-    categoryName: "categoryName",
-    category_name: "categoryName",
+    productName: "productName",
+    product_name: "productName",
     description: "description",
+    price: "price",
+    sku: "sku",
+    categoryId: "categoryId",
+    category_id: "categoryId",
+    inventoryCount: "inventoryCount",
+    inventory_count: "inventoryCount",
 };
 
 function guessFieldFromMessage(msg = "") {
     const lower = msg.toLowerCase();
+    if (lower.includes("sku")) return "sku";
+    if (lower.includes("product name") || lower.includes("productname")) return "productName";
+    if (lower.includes("price")) return "price";
+    if (lower.includes("category")) return "categoryId";
+    if (lower.includes("inventory")) return "inventoryCount";
     if (lower.includes("description")) return "description";
-    if (lower.includes("category name") || lower.includes("categoryname")) return "categoryName";
     return null;
 }
 
-export default function Category() {
-    const [categories, setCategories] = useState([]);
+export default function AdminProducts() {
+    const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [modalOpen, setModalOpen] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
-    const [selectedCategory, setSelectedCategory] = useState(null);
-
-    /* Reassignment modal state */
-    const [reassignOpen, setReassignOpen] = useState(false);
-    const [reassignCategory, setReassignCategory] = useState(null);
+    const [selectedProduct, setSelectedProduct] = useState(null);
 
     /* Pagination */
     const [page, setPage] = useState(0);
@@ -58,35 +66,35 @@ export default function Category() {
     /* Filter */
     const [statusFilter, setStatusFilter] = useState("active");
 
-    const fetchCategories = useCallback(async () => {
+    const fetchProducts = useCallback(async () => {
         setLoading(true);
         try {
-            const res = await getCategories(page, size, statusFilter);
+            const res = await getProducts(page, size, statusFilter);
             const pageData = res.data?.data;
-            setCategories(pageData?.content ?? []);
+            setProducts(pageData?.content ?? []);
             setTotalPages(pageData?.totalPages ?? 0);
             setTotalElements(pageData?.totalElements ?? 0);
         } catch (error) {
-            toast.error(error.response?.data?.message || "Failed to load categories.");
+            toast.error(error.response?.data?.message || "Failed to load products.");
         } finally {
             setLoading(false);
         }
     }, [page, size, statusFilter]);
 
     useEffect(() => {
-        fetchCategories();
-    }, [fetchCategories]);
+        fetchProducts();
+    }, [fetchProducts]);
 
     /* Modal helpers */
     const openCreateModal = useCallback(() => {
         setIsEditing(false);
-        setSelectedCategory(null);
+        setSelectedProduct(null);
         setModalOpen(true);
     }, []);
 
-    const openEditModal = useCallback((category) => {
+    const openEditModal = useCallback((product) => {
         setIsEditing(true);
-        setSelectedCategory(category);
+        setSelectedProduct(product);
         setModalOpen(true);
     }, []);
 
@@ -94,7 +102,7 @@ export default function Category() {
 
     const handleModalClosed = useCallback(() => {
         setIsEditing(false);
-        setSelectedCategory(null);
+        setSelectedProduct(null);
     }, []);
 
     /* Create / Update */
@@ -102,15 +110,15 @@ export default function Category() {
         async (data, setError) => {
             try {
                 if (isEditing) {
-                    const res = await updateCategory(selectedCategory.categoryId, data);
+                    const res = await updateProduct(selectedProduct.productId, data);
                     toast.success(res.data.message);
                 } else {
-                    const res = await createCategory(data);
+                    const res = await createProduct(data);
                     toast.success(res.data.message);
                 }
                 closeModal();
                 if (page === 0) {
-                    fetchCategories();
+                    fetchProducts();
                 } else {
                     setPage(0);
                 }
@@ -120,11 +128,11 @@ export default function Category() {
                 const serverMsg = body?.message || "Unexpected error. Please try again.";
 
                 if (status === 409) {
-                    setError("categoryName", {
+                    setError("sku", {
                         type: "server",
-                        message: body?.message ?? "Category name already exists.",
+                        message: body?.message ?? "SKU already exists.",
                     });
-                    toast.error(body?.message || "Duplicate name — choose another.");
+                    toast.error(body?.message || "Duplicate SKU — choose another.");
 
                 } else if (status === 400) {
                     const details = body?.data;
@@ -149,7 +157,6 @@ export default function Category() {
                         if (routedCount === 0 && unknownErrors.length === 0) {
                             toast.error(serverMsg);
                         }
-
                     } else {
                         const guessedField = guessFieldFromMessage(serverMsg);
                         if (guessedField) {
@@ -164,65 +171,49 @@ export default function Category() {
                 }
             }
         },
-        [isEditing, selectedCategory, closeModal, fetchCategories, page]
+        [isEditing, selectedProduct, closeModal, fetchProducts, page]
     );
 
-    /* Toggle Status — uses reassignment modal for deactivation */
+    /* Toggle Status */
     const handleToggleStatus = useCallback(
-        (category) => {
-            const isActivating = !category.status;
+        (product) => {
+            const isActivating = !product.status;
+            const actionText = isActivating ? "Activate" : "Deactivate";
 
-            if (isActivating) {
-                // Simple activation — no reassignment needed
-                toast(`Activate "${category.categoryName}"?`, {
-                    action: {
-                        label: "Activate",
-                        onClick: async () => {
-                            try {
-                                const res = await toggleCategoryStatus(category.categoryId, null);
-                                toast.success(res.data.message);
-                                fetchCategories();
-                            } catch (error) {
+            const message = isActivating
+                ? `Activate "${product.productName}"?`
+                : `Deactivating this product will hide it from the customer interface. Deactivate "${product.productName}"?`;
+
+            toast(message, {
+                action: {
+                    label: actionText,
+                    onClick: async () => {
+                        try {
+                            const res = await toggleProductStatus(product.productId);
+                            toast.success(res.data.message);
+                            if (page >= totalPages - 1 && page > 0 && products.length === 1) {
+                                setPage((p) => p - 1);
+                            } else {
+                                fetchProducts();
+                            }
+                        } catch (error) {
+                            const status = error?.response?.status;
+                            if (status === 404) {
+                                toast.error("Product not found.");
+                                fetchProducts();
+                            } else {
                                 toast.error(
-                                    error.response?.data?.message || "Failed to activate category."
+                                    error.response?.data?.message ||
+                                    `Failed to ${actionText.toLowerCase()} product.`
                                 );
                             }
-                        },
+                        }
                     },
-                    cancel: { label: "Cancel", onClick: () => { } },
-                });
-            } else {
-                // Deactivation — open reassignment modal
-                setReassignCategory(category);
-                setReassignOpen(true);
-            }
+                },
+                cancel: { label: "Cancel", onClick: () => { } },
+            });
         },
-        [fetchCategories]
-    );
-
-    const handleReassignConfirm = useCallback(
-        async (reassignCategoryId) => {
-            try {
-                const res = await toggleCategoryStatus(
-                    reassignCategory.categoryId,
-                    reassignCategoryId
-                );
-                toast.success(res.data.message);
-                setReassignOpen(false);
-                setReassignCategory(null);
-
-                if (page >= totalPages - 1 && page > 0 && categories.length === 1) {
-                    setPage((p) => p - 1);
-                } else {
-                    fetchCategories();
-                }
-            } catch (error) {
-                toast.error(
-                    error.response?.data?.message || "Failed to deactivate category."
-                );
-            }
-        },
-        [reassignCategory, fetchCategories, page, totalPages, categories.length]
+        [fetchProducts, page, totalPages, products.length]
     );
 
     return (
@@ -233,10 +224,10 @@ export default function Category() {
                 <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-6">
                     <div className="flex-1">
                         <h1 className="text-2xl font-bold text-[var(--text-primary)]">
-                            Categories
+                            Products
                         </h1>
                         <p className="mt-0.5 text-sm text-[var(--text-secondary)]">
-                            Manage your product categories
+                            Manage your product catalog
                         </p>
                     </div>
 
@@ -257,13 +248,13 @@ export default function Category() {
                         </select>
                     </div>
 
-                    {/* New Category */}
+                    {/* New Product */}
                     <button
                         onClick={openCreateModal}
-                        aria-label="Add new category"
+                        aria-label="Add new product"
                         className="self-start sm:self-auto px-4 py-2 rounded-lg text-sm font-medium text-white shadow-sm bg-[var(--accent-primary)] hover:bg-[var(--accent-hover)] transition-colors duration-150"
                     >
-                        + New Category
+                        + New Product
                     </button>
                 </div>
 
@@ -277,7 +268,7 @@ export default function Category() {
                             <table className="w-full text-sm border-collapse">
                                 <thead>
                                     <tr className="bg-[var(--bg-subtle)]">
-                                        {["#", "Name", "Description", "Status", "Created At", "Actions"].map((h) => (
+                                        {["#", "Name", "SKU", "Price", "Category", "Inventory", "Status", "Actions"].map((h) => (
                                             <th
                                                 key={h}
                                                 className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wide text-[var(--text-muted)]"
@@ -294,7 +285,7 @@ export default function Category() {
                         </div>
                     ) : (
                         <MemoTable
-                            categories={categories}
+                            products={products}
                             onEdit={openEditModal}
                             onToggleStatus={handleToggleStatus}
                         />
@@ -305,7 +296,7 @@ export default function Category() {
                 {!loading && (
                     <p className="mt-3 text-xs text-right text-[var(--text-muted)]">
                         {totalElements}{" "}
-                        {totalElements === 1 ? "category" : "categories"} total
+                        {totalElements === 1 ? "product" : "products"} total
                     </p>
                 )}
 
@@ -333,31 +324,19 @@ export default function Category() {
                 )}
             </div>
 
-            {/* Create/Edit Modal */}
+            {/* Modal */}
             <Modal
                 isOpen={modalOpen}
                 onClose={closeModal}
                 onClosed={handleModalClosed}
-                title={isEditing ? "Edit Category" : "New Category"}
+                title={isEditing ? "Edit Product" : "New Product"}
             >
-                <CategoryForm
+                <ProductForm
                     isEditing={isEditing}
-                    defaultValues={selectedCategory}
+                    defaultValues={selectedProduct}
                     onSubmit={handleFormSubmit}
                 />
             </Modal>
-
-            {/* Reassignment Modal */}
-            <CategoryReassignModal
-                isOpen={reassignOpen}
-                category={reassignCategory}
-                onClose={() => {
-                    setReassignOpen(false);
-                    setReassignCategory(null);
-                }}
-                onConfirm={handleReassignConfirm}
-                actionLabel="Deactivate"
-            />
         </div>
     );
 }

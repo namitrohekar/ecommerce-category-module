@@ -4,7 +4,17 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>category-frontend</title>
+    <meta name="description" content="ShopHub - Browse and manage products and categories" />
+    <title>VIBGYOR-Ecommerce module</title>
+    <script>
+      // Prevent flash of wrong theme on load
+      (function() {
+        var theme = localStorage.getItem('theme');
+        if (theme === 'dark') {
+          document.documentElement.dataset.theme = 'dark';
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>
