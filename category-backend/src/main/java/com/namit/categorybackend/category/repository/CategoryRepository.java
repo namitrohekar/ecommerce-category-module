@@ -11,15 +11,20 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-public interface CategoryRepository extends JpaRepository<Category, Long> , JpaSpecificationExecutor<Category> {
+public interface CategoryRepository extends JpaRepository<Category, Long>, JpaSpecificationExecutor<Category> {
 
     Boolean existsByCategoryName(String categoryName);
 
     /*
-    * Instead of findall to get all categories we can just get active categories (later we can implement a
-    * method where we can get all active and inactive if needed
-    * */
+     * Instead of findall to get all categories we can just get active categories
+     * (later we can implement a
+     * method where we can get all active and inactive if needed
+     */
     Page<Category> findByStatusTrue(Pageable pageable);
+
     Optional<Category> findByCategoryIdAndStatusTrue(Long id);
+
+    // For Uncategorized category lookup by name
+    Optional<Category> findByCategoryName(String categoryName);
 
 }

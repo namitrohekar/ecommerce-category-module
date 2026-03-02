@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpecificationExecutor<Product> {
@@ -24,5 +25,11 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
     // Override to eagerly fetch category in a single JOIN query (prevents N+1)
     @EntityGraph(attributePaths = { "category" })
     Page<Product> findAll(Specification<Product> spec, Pageable pageable);
+
+    // For category reassignment — find all products belonging to a category
+    List<Product> findByCategoryCategoryId(Long categoryId);
+
+    // For category product count check before deactivation
+    long countByCategoryCategoryId(Long categoryId);
 
 }

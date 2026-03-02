@@ -26,119 +26,131 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class ProductServiceImpl implements ProductService {
 
-    private final ProductRepository productRepository;
-    private final CategoryRepository categoryRepository;
+        private final ProductRepository productRepository;
+        private final CategoryRepository categoryRepository;
 
-    @Override
-    @Transactional
-    public ProductResponse createProduct(ProductRequest request) {
+        @Override
+        @Transactional
+        public ProductResponse createProduct(ProductRequest request) {
 
-        // SKU uniqueness check
-        if(productRepository.existsBySku(request.getSku())){
-            throw new ResourceAlreadyExistsException(
-                    "A product with SKU '" + request.getSku() + "' already exists.");
+                // SKU uniqueness check
+                if (productRepository.existsBySku(request.getSku())) {
+                        throw new ResourceAlreadyExistsException(
+                                        "A product with SKU '" + request.getSku() + "' already exists.");
+                }
+
+                // validate category existence
+                Category category = categoryRepository.findByCategoryIdAndStatusTrue(request.getCategoryId())
+                                .orElseThrow(() -> new ResourceNotFoundException(
+                                                "Active category with ID '" + request.getCategoryId()
+                                                                + "' not found."));
+
+                Product product = ProductMapper.toEntity(request);
+
+                product.setCategory(category);
+
+                Product savedProduct = productRepository.save(product);
+                return ProductMapper.toResponse(savedProduct);
         }
 
-        // validate category existence
-        Category category = categoryRepository.findByCategoryIdAndStatusTrue(request.getCategoryId())
-                .orElseThrow(() ->
-                        new ResourceNotFoundException(
-                                "Active category with ID '" + request.getCategoryId() + "' not found."
-                        ));
+        @Override
+        @Transactional(readOnly = true)
+        public PagedResponse<ProductResponse> getAllProducts(int page, int size, String status) {
 
-        Product product = ProductMapper.toEntity(request);
+                Pageable pageable = PageRequest.of(
+                                page,
+                                size,
+                                Sort.by("createdAt").descending());
+                Boolean statusValue = switch (status.toLowerCase()) {
+                        case "inactive" -> false;
+                        case "all" -> null;
+                        default -> true;
+                };
 
-        product.setCategory(category);
+                Specification<Product> spec = Specification.where(ProductSpecification.hasStatus((statusValue)));
 
-        Product savedProduct = productRepository.save(product);
-        return ProductMapper.toResponse(savedProduct);
-    }
+                Page<Product> productPage = productRepository.findAll(spec, pageable);
 
+                Page<ProductResponse> mappedPage = productPage.map(ProductMapper::toResponse);
 
-
-    @Override
-    public PagedResponse<ProductResponse> getAllProducts(int page , int size , String status){
-
-        Pageable pageable = PageRequest.of(
-                page,
-                size,
-                Sort.by("createdAt").descending()
-        );
-        Boolean statusValue = switch (status.toLowerCase()){
-            case "inactive" -> false;
-            case "all" -> null;
-            default -> true;
-        };
-
-
-        Specification<Product> spec = Specification.where(ProductSpecification.hasStatus((statusValue)));
-
-        Page<Product> productPage = productRepository.findAll(spec , pageable);
-
-        Page<ProductResponse> mappedPage = productPage.map(ProductMapper::toResponse);
-
-        return new PagedResponse<>(
-                mappedPage.getContent(),
-                mappedPage.getNumber(),
-                mappedPage.getSize(),
-                mappedPage.getTotalElements(),
-                mappedPage.getTotalPages()
-        );
-    }
-
-
-    @Override
-    @Transactional(readOnly = true)
-    public ProductResponse getProductById(Long id) {
-
-        Product product = productRepository.findById(id).orElseThrow( () ->
-                new ResourceNotFoundException("Product cannot be found with ID:" + id));
-
-        return ProductMapper.toResponse(product);
-    }
-
-
-    @Override
-    @Transactional
-    public ProductResponse toggleProductStatus(Long id){
-
-        Product product = productRepository.findById(id).orElseThrow(()->
-                new ResourceNotFoundException("Product not found with ID: " + id));
-        product.setStatus(!product.getStatus());
-
-        return ProductMapper.toResponse(product);
-
-    }
-
-
-
-    @Override
-    @Transactional
-    public ProductResponse updateProduct(Long id , ProductRequest request){
-
-        Product product = productRepository.findByProductIdAndStatusTrue(id).orElseThrow(() ->
-                new ResourceNotFoundException("Product not found with ID: " + id));
-        Category category = categoryRepository
-                .findByCategoryIdAndStatusTrue(request.getCategoryId())
-                .orElseThrow(() ->
-                        new ResourceNotFoundException(
-                                "Active category with ID '" + request.getCategoryId() + "' not found."
-                        ));
-
-
-
-        if(productRepository.existsBySkuAndProductIdNot(
-                request.getSku(),id)){
-            throw  new ResourceAlreadyExistsException("A product with SKU '" + request.getSku() + "' already exists");
+                return new PagedResponse<>(
+                                mappedPage.getContent(),
+                                mappedPage.getNumber(),
+                                mappedPage.getSize(),
+                                mappedPage.getTotalElements(),
+                                mappedPage.getTotalPages());
         }
 
-        product.setProductName(request.getProductName());
-        product.setDescription(request.getDescription());
-        product.setPrice(request.getPrice());
-        product.setSku(request.getSku());
-        product.setInventoryCount(request.getInventoryCount());
-        product.setCategory(category);
+        @Override
+        @Transactional(readOnly = true)
+        public ProductResponse getProductById(Long id) {
 
-        return ProductMapper.toResponse(product);
-    }
+                Product product = productRepository.findById(id).orElseThrow(
+                                () -> new ResourceNotFoundException("Product cannot be found with ID:" + id));
+
+                return ProductMapper.toResponse(product);
+        }
+
+        @Override
+        @Transactional
+        public ProductResponse toggleProductStatus(Long id) {
+
+                Product product = productRepository.findById(id)
+                                .orElseThrow(() -> new ResourceNotFoundException("Product not found with ID: " + id));
+                product.setStatus(!product.getStatus());
+
+                return ProductMapper.toResponse(product);
+
+        }
+
+        @Override
+        @Transactional
+        public ProductResponse updateProduct(Long id, ProductRequest request) {
+
+                Product product = productRepository.findByProductIdAndStatusTrue(id)
+                                .orElseThrow(() -> new ResourceNotFoundException("Product not found with ID: " + id));
+                Category category = categoryRepository
+                                .findByCategoryIdAndStatusTrue(request.getCategoryId())
+                                .orElseThrow(() -> new ResourceNotFoundException(
+                                                "Active category with ID '" + request.getCategoryId()
+                                                                + "' not found."));
+
+                if (productRepository.existsBySkuAndProductIdNot(
+                                request.getSku(), id)) {
+                        throw new ResourceAlreadyExistsException(
+                                        "A product with SKU '" + request.getSku() + "' already exists");
+                }
+
+                product.setProductName(request.getProductName());
+                product.setDescription(request.getDescription());
+                product.setPrice(request.getPrice());
+                product.setSku(request.getSku());
+                product.setInventoryCount(request.getInventoryCount());
+                product.setCategory(category);
+
+                return ProductMapper.toResponse(product);
+        }
+
+        @Override
+        @Transactional(readOnly = true)
+        public PagedResponse<ProductResponse> getPublicProducts(int page, int size) {
+
+                Pageable pageable = PageRequest.of(
+                                page,
+                                size,
+                                Sort.by("createdAt").descending());
+
+                Specification<Product> spec = Specification.where(ProductSpecification.hasStatus(true));
+
+                Page<Product> productPage = productRepository.findAll(spec, pageable);
+
+                Page<ProductResponse> mappedPage = productPage.map(ProductMapper::toResponse);
+
+                return new PagedResponse<>(
+                                mappedPage.getContent(),
+                                mappedPage.getNumber(),
+                                mappedPage.getSize(),
+                                mappedPage.getTotalElements(),
+                                mappedPage.getTotalPages());
+        }
 }

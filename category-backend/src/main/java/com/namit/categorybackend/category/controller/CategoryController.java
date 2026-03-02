@@ -1,7 +1,9 @@
 package com.namit.categorybackend.category.controller;
 
+import com.namit.categorybackend.category.dto.CategoryDeactivateRequest;
 import com.namit.categorybackend.category.dto.CategoryRequest;
 import com.namit.categorybackend.category.dto.CategoryResponse;
+import com.namit.categorybackend.category.dto.ProductCountResponse;
 import com.namit.categorybackend.category.service.CategoryService;
 import com.namit.categorybackend.common.response.ApiWrapper;
 import com.namit.categorybackend.common.response.PagedResponse;
@@ -10,12 +12,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/categories")
@@ -49,11 +48,10 @@ public class CategoryController {
         })
         @GetMapping
         public ResponseEntity<ApiWrapper<PagedResponse<CategoryResponse>>> getAllCategories(
-                @RequestParam(defaultValue = "0") int page,
-                @RequestParam(defaultValue = "10") int size,
-                @RequestParam(defaultValue = "active") String status
-        ) {
-                PagedResponse<CategoryResponse> categories = categoryService.getAllCategories(page,size,status);
+                        @RequestParam(defaultValue = "0") int page,
+                        @RequestParam(defaultValue = "10") int size,
+                        @RequestParam(defaultValue = "active") String status) {
+                PagedResponse<CategoryResponse> categories = categoryService.getAllCategories(page, size, status);
 
                 return ResponseEntity.ok(
                                 ApiWrapper.success("Categories retrieved successfully", categories));
@@ -74,8 +72,7 @@ public class CategoryController {
                                 ApiWrapper.success("Category retrieved successfully", response));
         }
 
-        // Updates an existing category. Validates duplicate name only if name is
-        // changed.
+        // Updates an existing category.
         @Operation(summary = "Update category")
         @ApiResponses({
                         @ApiResponse(responseCode = "200", description = "Category updated"),
@@ -94,33 +91,54 @@ public class CategoryController {
                                 ApiWrapper.success("Category updated successfully", response));
         }
 
-        @Operation(summary = "Soft delete category")
+        @Operation(summary = "Soft delete category with product reassignment")
         @ApiResponses({
                         @ApiResponse(responseCode = "200", description = "Category deleted"),
                         @ApiResponse(responseCode = "404", description = "Category not found")
         })
         @DeleteMapping("/{id}")
-
         public ResponseEntity<ApiWrapper<Object>> deleteCategory(
-                        @PathVariable Long id) {
-                categoryService.deleteCategory(id);
+                        @PathVariable Long id,
+                        @RequestBody(required = false) CategoryDeactivateRequest request) {
+
+                Long reassignId = (request != null) ? request.getReassignCategoryId() : null;
+                categoryService.deleteCategory(id, reassignId);
 
                 return ResponseEntity.ok(
                                 ApiWrapper.success("Category deleted successfully", null));
         }
 
-        @Operation(summary = "Toggle category status")
+        @Operation(summary = "Toggle category status with product reassignment")
         @ApiResponses({
                         @ApiResponse(responseCode = "200", description = "Category status toggled"),
                         @ApiResponse(responseCode = "404", description = "Category not found")
         })
         @PatchMapping("/{id}/toggle")
         public ResponseEntity<ApiWrapper<CategoryResponse>> toggleCategoryStatus(
-                        @PathVariable Long id) {
-                CategoryResponse response = categoryService.toggleCategoryStatus(id);
+                        @PathVariable Long id,
+                        @RequestBody(required = false) CategoryDeactivateRequest request) {
+
+                Long reassignId = (request != null) ? request.getReassignCategoryId() : null;
+                CategoryResponse response = categoryService.toggleCategoryStatus(id, reassignId);
 
                 return ResponseEntity.ok(
                                 ApiWrapper.success("Category status toggled successfully", response));
         }
 
+        @Operation(summary = "Get product count for a category")
+        @ApiResponses({
+                        @ApiResponse(responseCode = "200", description = "Product count retrieved")
+        })
+        @GetMapping("/{id}/product-count")
+        public ResponseEntity<ApiWrapper<ProductCountResponse>> getProductCount(
+                        @PathVariable Long id) {
+
+                long count = categoryService.getProductCount(id);
+                ProductCountResponse response = ProductCountResponse.builder()
+                                .productCount(count)
+                                .build();
+
+                return ResponseEntity.ok(
+                                ApiWrapper.success("Product count retrieved successfully", response));
+        }
 }
