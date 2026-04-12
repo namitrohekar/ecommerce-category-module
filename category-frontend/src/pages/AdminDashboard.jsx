@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Package, FolderTree, ArrowRight } from "lucide-react";
+import { Package, FolderTree, ArrowRight, ShoppingCart } from "lucide-react";
 
 export default function AdminDashboard() {
     const cards = [
@@ -14,6 +14,12 @@ export default function AdminDashboard() {
             icon: FolderTree,
             title: "Categories",
             description: "Organize products into categories for easy navigation.",
+        },
+        {
+            to: "/admin/orders",
+            icon: ShoppingCart,
+            title: "Orders",
+            description: "Track and manage customer orders.",
         },
     ];
 

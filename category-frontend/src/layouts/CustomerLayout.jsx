@@ -1,13 +1,23 @@
-import { NavLink, Outlet } from "react-router-dom";
-import { Home, ShoppingBag } from "lucide-react";
+import { NavLink, Outlet, useNavigate } from "react-router-dom";
+import { Home, ShoppingBag, ShoppingCart, LogOut } from "lucide-react";
 import ThemeToggle from "../components/ThemeToggle";
+import { useAuth } from "../context/AuthContext";
 
 const navItems = [
     { to: "/", icon: Home, label: "Home", end: true },
     { to: "/products", icon: ShoppingBag, label: "Products" },
+    { to: "/orders", icon: ShoppingCart, label: "My Orders" },
 ];
 
 export default function CustomerLayout() {
+    const { user, logout } = useAuth();
+    const navigate = useNavigate();
+
+    const handleLogout = () => {
+        logout();
+        navigate("/login", { replace: true });
+    };
+
     return (
         <div className="min-h-screen flex flex-col bg-[var(--bg-primary)]">
             {/* Navbar */}
@@ -38,6 +48,24 @@ export default function CustomerLayout() {
                                 </NavLink>
                             ))}
                         </nav>
+
+                        {/* User pill */}
+                        {user && (
+                            <div className="flex items-center gap-2 pl-3 border-l border-[var(--border-soft)]">
+                                <span className="text-xs font-medium text-[var(--text-secondary)] hidden sm:block">
+                                    {user.name}
+                                </span>
+                                <button
+                                    id="customer-logout-btn"
+                                    onClick={handleLogout}
+                                    title="Sign out"
+                                    className="p-1.5 rounded-lg text-[var(--text-muted)] hover:text-[var(--danger)] hover:bg-[var(--danger-soft)] transition-colors"
+                                >
+                                    <LogOut size={16} />
+                                </button>
+                            </div>
+                        )}
+
                         <ThemeToggle />
                     </div>
                 </div>

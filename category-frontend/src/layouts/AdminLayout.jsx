@@ -1,14 +1,23 @@
-import { NavLink, Outlet } from "react-router-dom";
-import { LayoutDashboard, Package, FolderTree } from "lucide-react";
+import { NavLink, Outlet, useNavigate } from "react-router-dom";
+import { LayoutDashboard, Package, FolderTree, ShoppingCart, LogOut } from "lucide-react";
 import ThemeToggle from "../components/ThemeToggle";
+import { useAuth } from "../context/AuthContext";
 
 const navItems = [
     { to: "/admin", icon: LayoutDashboard, label: "Dashboard", end: true },
     { to: "/admin/products", icon: Package, label: "Products" },
     { to: "/admin/categories", icon: FolderTree, label: "Categories" },
+    { to: "/admin/orders", icon: ShoppingCart, label: "Orders" },
 ];
 
 export default function AdminLayout() {
+    const { user, logout } = useAuth();
+    const navigate = useNavigate();
+
+    const handleLogout = () => {
+        logout();
+        navigate("/login", { replace: true });
+    };
     const linkBase =
         "flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors duration-150";
     const linkInactive =
@@ -48,7 +57,20 @@ export default function AdminLayout() {
                     ))}
                 </nav>
 
-                <div className="px-4 py-4 border-t border-[var(--border-soft)]">
+                <div className="px-4 py-4 border-t border-[var(--border-soft)] space-y-3">
+                    {user && (
+                        <div className="flex items-center justify-between">
+                            <span className="text-xs font-medium text-[var(--text-muted)] truncate">👤 {user.name}</span>
+                            <button
+                                id="admin-logout-btn"
+                                onClick={handleLogout}
+                                title="Sign out"
+                                className="ml-2 p-1.5 rounded-lg text-[var(--text-muted)] hover:text-[var(--danger)] hover:bg-[var(--danger-soft)] transition-colors"
+                            >
+                                <LogOut size={15} />
+                            </button>
+                        </div>
+                    )}
                     <ThemeToggle />
                 </div>
             </aside>
