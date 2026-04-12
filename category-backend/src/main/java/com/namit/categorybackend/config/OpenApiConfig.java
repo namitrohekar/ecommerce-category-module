@@ -13,8 +13,8 @@ public class OpenApiConfig {
 
         return new OpenAPI()
                 .info(new Info()
-                        .title("Category Management API")
-                        .description("Category module for e-commerce backend")
-                        .version("v1.0"));
+                        .title("E-Commerce Management API")
+                        .description("Category, Product, and Order management for e-commerce backend")
+                        .version("1.0.0"));
     }
 }

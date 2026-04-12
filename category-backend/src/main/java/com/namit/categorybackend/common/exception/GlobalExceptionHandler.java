@@ -69,4 +69,18 @@ public class GlobalExceptionHandler {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
                                 .body(ApiWrapper.error(ex.getMessage()));
         }
+
+        @ExceptionHandler(InvalidOrderStateException.class)
+        public ResponseEntity<ApiWrapper<Object>> handleInvalidOrderStateException(
+                        InvalidOrderStateException ex) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                                .body(ApiWrapper.error(ex.getMessage()));
+        }
+
+        @ExceptionHandler(InsufficientInventoryException.class)
+        public ResponseEntity<ApiWrapper<Object>> handleInsufficientInventoryException(
+                        InsufficientInventoryException ex) {
+                return ResponseEntity.status(HttpStatus.CONFLICT)
+                                .body(ApiWrapper.error(ex.getMessage()));
+        }
 }
